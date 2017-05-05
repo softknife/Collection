@@ -7,3 +7,4 @@
 - [TGIDEAS](http://tgideas.qq.com/)
 - [Alloy](http://www.alloyteam.com/)
 - [FERD](http://qqfe.org/)
+- [TID](http://tid.tenpay.com/)
