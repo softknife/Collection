@@ -17,6 +17,8 @@
 |  ctrip  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/ctrip/ctrip.md) |
 |   360   | [Readme](https://github.com/EricYellow/PopularSite/blob/master/360/360.md) |
 | meituan | [Readme](https://github.com/EricYellow/PopularSite/blob/master/meituan/meituan.md) |
+| youdao  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/youdao/youdao.md)|
+| xunlei  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/xunlei/xunlei.md)|
 
 
 
