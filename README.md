@@ -1,6 +1,6 @@
 ![logo](https://github.com/EricYellow/PopularSite/blob/master/logo.png)
 
-# PopularSite
+# Collection
 技术/设计网站指南
 
 ******
