@@ -76,6 +76,7 @@
 |       Video&Audio   |  [Readme](https://github.com/EricYellow/Collection/blob/master/tech/ios/video%26audio/v%26a.md)      |
 |       APNs          |  [Readme](https://github.com/EricYellow/Collection/blob/master/tech/ios/apns/apns.md)      |
 |      Socket         |  [Readme](https://github.com/EricYellow/Collection/blob/master/tech/ios/socket/socket.md)      |
+|      Encry          |  [Readme](https://github.com/EricYellow/Collection/blob/master/tech/ios/encry/encry.md)|
 
 
 *******
