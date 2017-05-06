@@ -11,14 +11,14 @@
 
 | Company |                   Link                   |
 | :-----: | :--------------------------------------: |
-|  baidu  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/baidu/baidu.md) |
-|   ali   | [Readme](https://github.com/EricYellow/PopularSite/blob/master/ali/ali.md) |
-| tencent | [Readme](https://github.com/EricYellow/PopularSite/blob/master/tencent/tencent.md) |
-|  ctrip  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/ctrip/ctrip.md) |
-|   360   | [Readme](https://github.com/EricYellow/PopularSite/blob/master/360/360.md) |
-| meituan | [Readme](https://github.com/EricYellow/PopularSite/blob/master/meituan/meituan.md) |
-| youdao  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/youdao/youdao.md)|
-| xunlei  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/xunlei/xunlei.md)|
+|  baidu  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/company/baidu/baidu.md) |
+|   ali   | [Readme](https://github.com/EricYellow/PopularSite/blob/master/company/ali/ali.md) |
+| tencent | [Readme](https://github.com/EricYellow/PopularSite/blob/master/company/tencent/tencent.md) |
+|  ctrip  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/company/ctrip/ctrip.md) |
+|   360   | [Readme](https://github.com/EricYellow/PopularSite/blob/master/company/360/360.md) |
+| meituan | [Readme](https://github.com/EricYellow/PopularSite/blob/master/company/meituan/meituan.md) |
+| youdao  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/company/youdao/youdao.md)|
+| xunlei  | [Readme](https://github.com/EricYellow/PopularSite/blob/master/company/xunlei/xunlei.md)|
 
 
 *******
