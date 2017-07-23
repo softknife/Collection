@@ -13,3 +13,8 @@
 
 
 [Building with Swift Package Manager](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/SwiftPackageManager.md)
+
+
+[Configuring and Launching HTTPServer](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/ConfiguringAndLaunching.md)
+
+
