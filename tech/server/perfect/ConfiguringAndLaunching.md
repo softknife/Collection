@@ -226,7 +226,7 @@ Request handler generators 需要的配置数据用户可能没有提供,或者�
 
 **filters**:
 
-
+Request filters 可以筛选或者操作从客户端过来的请求. 例如,authentication filter可以用来检查请求是否有授权证书, 如果没有就向客户端返回错误.  Response filters 对于输出的数据进行类似的校验, 这里提供了一个可以对response headers or body 数据进行调整的场所.  详情的请查看Perfect's request filtering system [Request and Response Filters](http://www.perfect.org/docs/filters.html) .
 
 
 
