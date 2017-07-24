@@ -179,7 +179,54 @@ Perfect带有request handlers , 用以处理各种常用的任务: redirecting c
 
 
 
-响应的HTTPServer属性: `HTTPServer.addRoutes`.
+相应的HTTPServer属性: `HTTPServer.addRoutes`.
+
+
+
+**Adding Custom Request Handlers**
+
+尽管Perfect内置的request handlers 唾手可得, 但是大多用户还是希望能添加一些自定义的处理. "handler"键值可以指向我们自己的函数, 当路由uri 匹配到一个客户端请求时, 这个自定义的函数将会返回一个`RequestHandler`.
+
+
+
+需要注意的是你写入配置数据中的函数名是静态函数, 这些函数返回值是`RequestHandler`, 他们将会在后边被使用.  为了解析配置数据中的参数例如`staticFiles` "documentRoot"等,这些函数接受当前配置数据中的k-v对, 对应到每一个特定的路由上.
+
+同样重要的是你写的名字必选完全有效. 也就是说他必须包含你的swift 模块名, 任何内置的结构名字,例如struct,enum, 还有函数名本身. 这些需要通过"."分割开. 例如, 正如你所看到的静态文件handler展示为"PerfectHTTPServer.HTTPHandler.staticFiles". 它存在于"PerfectHTTPServer"内部的一个"HTTPServer"扩展中, 名字叫做"staticFiles".
+
+
+
+注意如果直接通过字典的方式创建你的配置到代码中, 那么你不必用双引号引起来函数名. "handler"的值可以直接引用.
+
+
+
+下面例子中是一个`RequestHandler`生成器:
+
+```objective-c
+
+public extension HTTPHandler {
+    public static func staticFiles(data: [String:Any]) throws -> RequestHandler {
+        let documentRoot = data["documentRoot"] as? String ?? "./webroot"
+        let allowResponseFilters = data["allowResponseFilters"] as? Bool ?? false
+        return {
+            req, resp in
+            StaticFileHandler(documentRoot: documentRoot, allowResponseFilters: allowResponseFilters)
+                .handleRequest(request: req, response: resp)
+        }
+    }
+}
+```
+
+
+
+注意: 结构体`HTTPHandler`是一个定义在PerfectHTTPServer中的抽象命名空间. 他由静态request handler generator组成,就像上面例子中的那样.
+
+Request handler generators 需要的配置数据用户可能没有提供,或者提供的数据无效,所以,建议采用`throw`写法. 注意确保你抛出异常的描述尽量浅显易懂些. 如果生成器不能返回一个有效的`RequestHandler`,那么他应该抛出一个异常.
+
+
+
+**filters**:
+
+
 
 
 
