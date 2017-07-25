@@ -349,7 +349,189 @@ Cipher list的默认值可以通过`TLSConfiguration.defaultCipherList`这个属
 
 ### HTTPServer.launch
 
+`HTTPServer.launch`函数有许多个变体, 他们都可以用来启动服务器. 这些函数概括了HTTPServer内部的工作机制, 提供一个更直观启动方法.
 
 
 
+最简单的启动服务器的方法:
+
+```objective-c
+
+public extension HTTPServer {
+    public static func launch(wait: Bool = true, name: String, port: Int, routes: Routes,
+                              requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                              responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = []) throws -> LaunchContext
+    public static func launch(wait: Bool = true, name: String, port: Int, routes: [Route],
+                              requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                              responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = []) throws -> LaunchContext
+    public static func launch(wait: Bool = true, name: String, port: Int, documentRoot root: String,
+                              requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                              responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = []) throws -> LaunchContext
+}
+```
+
+
+
+剩下的启动方法中需要有一个或者多个服务请描述作为参数, 启动服务器后会返回参数`LaunchContext`.
+
+```objective-c
+public extension HTTPServer {
+    public static func launch(wait: Bool = true, _ servers: [Server]) throws -> [LaunchContext]
+    public static func launch(wait: Bool = true, _ server: Server, _ servers: Server...) throws -> [LaunchContext]
+}
+```
+
+
+
+这里`Server`参数用以描述HTTPServer, 最后会被启动起来, Server这个这个类的结构如下:
+
+```objective-c
+public extension HTTPServer {
+    public struct Server {
+        public init(name: String, address: String, port: Int, routes: Routes,
+                    requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                    responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = [])
+        public init(tlsConfig: TLSConfiguration, name: String, address: String, port: Int, routes: Routes,
+                    requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                    responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = [])
+        public init(name: String, port: Int, routes: Routes,
+                    requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                    responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = [])
+        public init(tlsConfig: TLSConfiguration, name: String, port: Int, routes: Routes,
+                    requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                    responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = [])
+ 
+        public static func server(name: String, port: Int, routes: Routes,
+                                  requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                                  responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = []) -> Server
+        public static func server(name: String, port: Int, routes: [Route],
+                                  requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                                  responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = []) -> Server
+        public static func server(name: String, port: Int, documentRoot root: String,
+                                  requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                                  responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = []) -> Server
+        public static func secureServer(_ tlsConfig: TLSConfiguration, name: String, port: Int, routes: [Route],
+                                        requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [],
+                                        responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = []) -> Server
+    }
+}
+```
+
+下面是启动服务器的一些常用写法:
+
+```objective-c
+// start a single server serving static files
+try HTTPServer.launch(name: "localhost", port: 8080, documentRoot: "/path/to/webroot")
+ 
+// start two servers. have one serve static files and the other handle API requests
+let apiRoutes = Route(method: .get, uri: "/foo/bar", handler: {
+        req, resp in
+        //do stuff
+    })
+try HTTPServer.launch(
+    .server(name: "localhost", port: 8080, documentRoot:  "/path/to/webroot"),
+    .server(name: "localhost", port: 8181, routes: [apiRoutes]))
+ 
+// start a single server which handles API and static files
+try HTTPServer.launch(name: "localhost", port: 8080, routes: [
+    Route(method: .get, uri: "/foo/bar", handler: {
+        req, resp in
+        //do stuff
+    }),
+    Route(method: .get, uri: "/foo/bar", handler:
+        HTTPHandler.staticFiles(documentRoot: "/path/to/webroot"))
+    ])
+ 
+let apiRoutes = Route(method: .get, uri: "/foo/bar", handler: {
+        req, resp in
+        //do stuff
+    })
+// start a secure server
+try HTTPServer.launch(.secureServer(TLSConfiguration(certPath: "/path/to/cert"), name: "localhost", port: 8080, routes: [apiRoutes]))
+
+```
+
+这里`TLSConfiguration`结构体是用来配置HTTPS,定义如下:
+
+```objective-c
+public struct TLSConfiguration {
+    public init(certPath: String, keyPath: String? = nil,
+                caCertPath: String? = nil, certVerifyMode: OpenSSLVerifyMode? = nil,
+                cipherList: [String] = TLSConfiguration.defaultCipherList)
+}
+```
+
+
+
+### LaunchContext
+
+如果上述任何一个`HTTPServer.launch`方法中`wait:false`,那么一个或者多个`LaunchContext`将会被返回. 通过这些对象我们可以检查每个server的状态, 同时我们可以通过他们来控制每个server终止.
+
+```objective-c
+public extension HTTPServer {
+    public struct LaunchFailure: Error {
+        let message: String
+        let configuration: Server
+    }
+ 
+    public class LaunchContext {
+        public var terminated: Bool
+        public let server: Server
+        public func terminate() -> LaunchContext
+        public func wait(seconds: Double = Threading.noTimeout) throws -> Bool
+    }
+}
+```
+
+
+
+当server启动失败时, 将会上抛一个error,然后当`wait`函数调用时,这个error将会被传递再上抛.
+
+
+
+### HTTPServer Object
+
+`HTTPServer`对象可以实例化,可以配置,还可以手动启动.
+
+
+
+```objective-c
+
+public class HTTPServer {
+    /// The directory in which web documents are sought.
+    /// Setting the document root will add a default URL route which permits
+    /// static files to be served from within.
+    public var documentRoot: String
+    /// The port on which the server is listening.
+    public var serverPort: UInt16 = 0
+    /// The local address on which the server is listening. The default of 0.0.0.0 indicates any address.
+    public var serverAddress = "0.0.0.0"
+    /// Switch to user after binding port
+    public var runAsUser: String?
+ 
+    /// The canonical server name.
+    /// This is important if utilizing the `HTTPRequest.serverName` property.
+    public var serverName = ""
+    public var ssl: (sslCert: String, sslKey: String)?
+    public var caCert: String?
+    public var certVerifyMode: OpenSSLVerifyMode?
+    public var cipherList: [String]
+    /// Initialize the server object.
+    public init()
+    /// Add the Routes to this server.
+    public func addRoutes(_ routes: Routes)
+    /// Set the request filters. Each is provided along with its priority.
+    /// The filters can be provided in any order. High priority filters will be sorted above lower priorities.
+    /// Filters of equal priority will maintain the order given here.
+    public func setRequestFilters(_ request: [(HTTPRequestFilter, HTTPFilterPriority)]) -> HTTPServer
+    /// Set the response filters. Each is provided along with its priority.
+    /// The filters can be provided in any order. High priority filters will be sorted above lower priorities.
+    /// Filters of equal priority will maintain the order given here.
+    public func setResponseFilters(_ response: [(HTTPResponseFilter, HTTPFilterPriority)]) -> HTTPServer
+    /// Start the server. Does not return until the server terminates.
+    public func start() throws
+    /// Stop the server by closing the accepting TCP socket. Calling this will cause the server to break out of the otherwise blocking `start` function.
+    public func stop()
+}
+```
 
