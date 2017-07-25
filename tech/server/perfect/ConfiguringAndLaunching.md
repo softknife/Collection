@@ -230,5 +230,126 @@ Request filters 可以筛选或者操作从客户端过来的请求. 例如,auth
 
 
 
+"filters"对应的值为一个数组,其中每个字典类型的元素是对每个filter的描述. 字典中的keys必填项是 "type","name".  "type"对应的可能值为"request"或者"response", 是指一个request filter或者response filter. "priority"这个key也可以自定义,他的值为"high"或者"medium"或者"low", 如果未设置,那么默认值是"high".
+
+
+
+下面例子中有两个filters,一个是request,一个是response.
+
+```objective-c
+[
+    "servers": [
+        [
+        "name":"localhost",
+        "port":8080,
+        "routes":[
+            ["method":"get", "uri":"/**", "handler":"PerfectHTTPServer.HTTPHandler.staticFiles",
+            "documentRoot":"./webroot"]
+        ],
+        "filters":[
+            [
+                "type":"request",
+                "priority":"high",
+                "name":"PerfectHTTPServer.HTTPFilter.customReqFilter"
+            ],
+            [
+                "type":"response",
+                "priority":"high",
+                "name":"PerfectHTTPServer.HTTPFilter.custom404",
+                "path":"./webroot/404.html"
+            ]
+        ]
+    ]
+]
+```
+
+
+
+Filters的名字的工作机制和route handlers类似,  但是,他们的函数签名是不同的.  一个request filter generator 函数持有一个包含配置数据的[String:Any]字典, 返回值根据`type`区分为`HTTPRequestFilter`或者`HTTPResponseFilter`.
+
+```objective-c
+// a request filter generator
+public func customReqFilter(data: [String:Any]) throws -> HTTPRequestFilter {
+    struct ReqFilter: HTTPRequestFilter {
+        func filter(request: HTTPRequest, response: HTTPResponse, callback: (HTTPRequestFilterResult) -> ()) {
+            callback(.continue(request, response))
+        }
+    }
+    return ReqFilter()
+}
+ 
+// a response filter generator
+public func custom404(data: [String:Any]) throws -> HTTPResponseFilter {
+    guard let path = data["path"] as? String else {
+        fatalError("HTTPFilter.custom404(data: [String:Any]) requires a value for key \"path\".")
+    }
+    struct Filter404: HTTPResponseFilter {
+        let path: String
+        func filterHeaders(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+            if case .notFound = response.status {
+                do {
+                    response.setBody(string: try File(path).readString())
+                } catch {
+                    response.setBody(string: "An error occurred but I could not find the error file. \(response.status)")
+                }
+                response.setHeader(.contentLength, value: "\(response.bodyBytes.count)")
+            }
+            return callback(.continue)
+        }
+        func filterBody(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+            callback(.continue)
+        }
+    }
+    return Filter404(path: path)
+}
+```
+
+
+
+对应的HTTPServer属性: `HTTPServer.setRequestFilters`和`HTTPServer.setResponseFilters`.
+
+
+
+**tlsConfig**:
+
+如果`tlsConfig`这个key被配置了,那么HTTPS服务器将会尝试着启动. TLS的配置数据是一个字典,其中包含一些必填和选填项,如下:
+
+- certPath — `required`the certificate file 的文件路径.
+- keyPath — `optional` the key file 文件路径.
+- cipherList — `optional` ciphers数组, that the server will support.
+- caCertPath — `optional` the CA cert file 文件路径.
+- verifyMode — `optional` 字符串,用来表明怎么验证是否为安全的链接. 他的值应该为如下一个:
+  - none
+  - peer
+  - failIfNoPeerCert
+  - clientOnce
+  - peerWithFailIfNoPeerCert
+  - peerClientOnce
+  - peerWithFailIfNoPeerCertClientOnce
+
+Cipher list的默认值可以通过`TLSConfiguration.defaultCipherList`这个属性获得.
+
+
+
+**User Switching**: 服务器安全
+
+使用root权限启动服务器, 绑定服务器到指定端口后, 建议服务器进程切换到非root用户.  这类用户通常是权限较低且受限制, 这样以便于防止犯罪性质的安全攻击, 这类攻击一般是服务器运行在root权限下.(These users are generally given low or restricted permissions in order to prevent security attacks which could be perpetrated were the server running as root.)
+
+在配置数据的最上面, 你可以包含一个"runAs"的key. 这个字符串类型的值表示我们希望用来运行服务器的用户. 当所有的服务器都成功的绑定到各自的监听端口上时, 服务器进程将会切换到这个用户下.
+
+
+
+注意,仅仅使用root权限启动的进程才可以讲权限切换到users.
+
+
+
+对应的HTTPServer函数是: `HTTPServer.runAs(_ user: String)`.
+
+
+
+### HTTPServer.launch
+
+
+
 
 
