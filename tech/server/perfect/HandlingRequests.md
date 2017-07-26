@@ -14,15 +14,24 @@
 
 参考下面章节,获取更多细节, 查看每一部分能完成那些事情:
 
-- [Routing](http://www.perfect.org/docs/routing.html) - 描述路由系统, 展示如何添加URL handlers.  
-- [HTTPRequest](http://www.perfect.org/docs/HTTPRequest.html) -关于请求对象协议的更多细节.  
-- [HTTPResponse](http://www.perfect.org/docs/HTTPResponse.html) - 关于响应对象协议的更多细节.
-- [Request & Response Filters](http://www.perfect.org/docs/filters.html) - 展示如何添加filters,以及阐述如何使用它们. 
+- [Routing](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/Routing.md) - 描述路由系统, 展示如何添加URL handlers.  
+- [HTTPRequest](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/HTTPRequest.md) -关于请求对象协议的更多细节.  
+- [HTTPResponse](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/HTTPResponse.md) - 关于响应对象协议的更多细节.
+- [Request & Response Filters](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/Request-ResponseFilters.md) - 展示如何添加filters,以及阐述如何使用它们. 
 
+
+其他:
+- [Session](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/Sessions.md)
+- [Local Authentication modules](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/LocalAuthentication.md)
+- [SPNEGO Security](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/SPNEGOSecurity.md)
+- [JSON](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/JSON.md)
 
 
 除此之外, 下面两个章节将会说明如何使用一些预制的具体handlers, 这些handlers是用来完成一些特定的任务的:
 
-- [Static File Handler](http://www.perfect.org/docs/staticFileContent.html) - 描述如何呈递静态文件.
-- [Mustache](http://www.perfect.org/docs/mustache.html) - 展示如何填充和使用Mustache模板.
+- [Static File Handler](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/StaticFileContext.md) - 描述如何呈递静态文件.
+- [Mustache](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/Mustache.md) - 展示如何填充和使用Mustache模板.
+
+- [Markdown](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/Markdown.md)
+- [HTTPRequest Logging](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests/HTTPRequestLogging.md)
 
