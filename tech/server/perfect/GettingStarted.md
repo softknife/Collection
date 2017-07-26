@@ -57,7 +57,7 @@ When building on Linux, OpenSSL 1.0.2+ is required for this package. On Ubuntu 1
 
 
 
-```objective-c
+```swift
 git clone https://github.com/PerfectlySoft/PerfectTemplate.git
 cd PerfectTemplate
 swift build
@@ -102,7 +102,7 @@ SPM可以生成一个Xcode项目,这样你就可以在xcode中进行代码编辑
 
 ### Get a Client Request Header
 
-```objective-c
+```swift
 if let acceptEncoding = request.header(.acceptEncoding) {
     ...
 }
@@ -112,7 +112,7 @@ if let acceptEncoding = request.header(.acceptEncoding) {
 
 ### Client GET and POST Parameters
 
-```objective-c
+```swift
 if let foo = request.param(name: "foo") {
     ...
 }
@@ -126,7 +126,7 @@ let foos: [String] = request.params(named: "foo")
 
 ### Get the Current Request Path
 
-```objective-c
+```swift
 let path = request.path
 ```
 
@@ -136,7 +136,7 @@ let path = request.path
 
 > 如果是开发API 服务器,此项可以忽略
 
-```objective-c
+```swift
 let docRoot = request.documentRoot
 do {
     let mrPebbles = File("\(docRoot)/mr_pebbles.jpg")
@@ -158,7 +158,7 @@ response.completed()
 
 > 如果是开发API服务器,此项可以忽略
 
-```objective-c
+```swift
 for (cookieName, cookieValue) in request.cookies {
     ...
 }
@@ -171,7 +171,7 @@ for (cookieName, cookieValue) in request.cookies {
 
 > 如果是开发API服务器,此项可以忽略
 
-```objective-c
+```swift
 let cookie = HTTPCookie(name: "cookie-name", value: "the value", domain: nil,
                     expires: .session, path: "/",
                     secure: false, httpOnly: false)
@@ -182,7 +182,7 @@ response.addCookie(cookie)
 
 ### Returning JSON Data to Clien
 
-```objective-c
+```swift
 response.setHeader(.contentType, value: "application/json")
 let d: [String:Any] = ["a":1, "b":0.1, "c": true, "d":[2, 4, 5, 7, 8]]
  
@@ -202,7 +202,7 @@ response.completed()
 
 > 如果是开发API服务器,此项可以忽略
 
-```objective-c
+```swift
 response.status = .movedPermanently
 response.setHeader(.location, value: "http://www.perfect.org/")
 response.completed()
@@ -212,7 +212,7 @@ response.completed()
 
 ### Filtering and Handling 404 Errors in a Custom Manner
 
-```objective-c
+```swift
 struct Filter404: HTTPResponseFilter {
     func filterBody(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
         callback(.continue)
