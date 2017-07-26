@@ -8,7 +8,7 @@
 
 先创建一个文件夹,用来存放你的应用: 
 
-```objective-c
+```swift
 mkdir MyAwesomeProject
 cd MyAwesomeProject
 ```
@@ -17,7 +17,7 @@ cd MyAwesomeProject
 
 为了更好的开发体验,我们添加一个`git repo`:
 
-```objective-c
+```swift
 git init
 touch README.html
 git add README.html
@@ -32,7 +32,7 @@ git commit -m "Initial commit"
 
 在根目录下创建一个`Package.swift`文件,并且输入如下内容,这些内容是是用来导入Perfect框架的.
 
-```objective-c
+```swift
 import PackageDescription
  
 let package = Package(
@@ -50,7 +50,7 @@ let package = Package(
 
 然后,创建一个叫做`Sources`的文件夹, 在其内部创建一个`main.swift`的文件: 
 
-```objective-c
+```swift
 mkdir Sources
 echo 'print("Well hi there!")' >> Sources/main.swift
 ```
@@ -59,7 +59,7 @@ echo 'print("Well hi there!")' >> Sources/main.swift
 
 至此, 项目准备工作已经做完, 我们可以通过如下命令将服务器跑起来:
 
-```objective-c
+```swift
 swift build
 .build/debug/MyAwesomeProject
 ```
@@ -68,7 +68,7 @@ swift build
 
 你将会看到如下输出:
 
-```objective-c
+```swift
 
 Well hi there!
 
@@ -80,7 +80,7 @@ Well hi there!
 
 现在,我们用`Swift package `构建的空项目已经运行起来了, 下一步就是去安装HTTPServer. 打开`Sources/main.swift`文件,清空内容后,换成如下内容:
 
-```objective-c
+```swift
 import PerfectLib
 import PerfectHTTP
 import PerfectHTTPServer
@@ -116,7 +116,7 @@ do {
 
 重新build , run the project:
 
-```objective-c
+```swift
 swift build
 .build/debug/MyAwesomeProject
 ```
