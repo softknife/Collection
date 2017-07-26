@@ -2,7 +2,7 @@
 
 Routing 决定了哪个handler会接收到具体的请求.  一个handler是一个例程,函数或者方法, 他能决定接收和响应一个什么具体类型的请求或者信号. 请求的路由基于两点信息: the HTTP request method, and the request path. 一个路由完整意义上是指 an HTTP method, path, and handler 三者的组合. 路由的创建和添加是在服务器启动监听端口之前完成的. 例如:
 
-```objective-c
+```swift
 
 var routes = Routes()
 routes.add(method: .get, uri: "/path/one", handler: { request, response in
@@ -26,7 +26,7 @@ Routing API 是 the [PerfectHTTP](https://github.com/PerfectlySoft/Perfect-HTTP)
 
 在添加任何路由之前,你需要合适的handler function.  他接收一个request和一个response对象, 并且需要生产内容,放到response中, 他还需要在完成当前任务时做出声明. 一个request handler的简写方式如下:
 
-```objective-c
+```swift
 
 /// Function which receives request and response objects and generates content.
 public typealias RequestHandler = (HTTPRequest, HTTPResponse) -> ()
@@ -40,7 +40,7 @@ Requests在声明自己已经得出结论之前,我们始终认为他是激活�
 
 在路由对象添加到服务器之前,所有的路由事件需要添加到路由对象中. 路由对象创建后, 一个或者多个路由事件可以使用`add`函数添加到路由对象中.  路由体用如下函数:
 
-```objective-c
+```swift
 public struct Routes {
     /// Initialize with no baseUri.
     public init()
@@ -65,7 +65,7 @@ public struct Routes {
 
 路由对象可以初始化一个baseURI. 在任何一个路由事件被添加到路由对象中之前,baseURI会被添加到路由前面. 例如, 你可以初始化路由对象到指定的API版本, 比如给他指定baseURI为"/v1", 这样所有路由都会以"/v1"作为前缀. 路由对象也可以被添加到其他路由对象中, 这样每一个内部的路由就会有相同的前缀了. 下面例子中展示了如何创建两个API版本的路由集合. 第二个版本和第一个版本的路由,即使路径最后一段相同,他们的行为也不同:
 
-```objective-c
+```swift
 var routes = Routes()
 // Create routes for version 1 API
 var api = Routes()
@@ -104,7 +104,7 @@ routes.add(routes: api2Routes)
 
 HTTP1.1 和FastCGI perfect服务器都支持路由. 调用`addRoutes`函数就可以把路由添加到服务器. `addRoutes`函数可以被多次调用,以便添加多个路由. 一旦服务器启动后, 路由不可以再被添加和修改.
 
-```objective-c
+```swift
 // Create server object
 let server = HTTPServer()
 // Add our routes
@@ -138,14 +138,14 @@ Routes URIs可以包含变量. 变量需要使用`{}`括起来. 在大括号内�
 
 URI为`/foo/*/baz`的路由可以匹配如下两个URLs:
 
-```objective-c
+```swift
 /foo/123/baz
 /foo/bar/baz
 ```
 
 URI为`/foo/**`的路由将会匹配如下URLs:
 
-```objective-c
+```swift
 /foo/bar/baz
 /foo
 ```
@@ -156,7 +156,7 @@ URI为`/**`的路由将会匹配任何请求.
 
 尾部为通配符的路由当被匹配到时,将会保存URI部分.  It will place this path segment in the `HTTPRequest.urlVariables` map under the key indicated by the global variable `routeTrailingWildcardKey`. 例如, 假设一个路由的URI为`/foo/**`,请求的URI为`/foo/bar/baz`, 下面这段代码执行结果为`true`:
 
-```objective-c
+```swift
 request.urlVariables[routeTrailingWildcardKey] == "/bar/baz"
 ```
 
