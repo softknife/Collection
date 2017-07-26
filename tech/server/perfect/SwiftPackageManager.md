@@ -16,7 +16,7 @@
 
 下一步是克隆模板项目. 打开一个新的命令行,cd到新项目文件目录下,然后,克隆模板项目. 输入如下命令,开始克隆项目:
 
-```objective-c
+```swift
 git clone https://github.com/PerfectlySoft/PerfectTemplate.git
 ```
 
@@ -35,7 +35,7 @@ git clone https://github.com/PerfectlySoft/PerfectTemplate.git
 
 The PerfectTemplate *Package.swift* manifest file 包含如下内容:
 
-```objective-c
+```swift
 
 import PackageDescription
 
@@ -71,7 +71,7 @@ let package = Package(
 
 随着你的项目推进, 你添加更多依赖, 你将要把这些依赖添加到依赖列表中.SPM将会自动下载适合的版本,并编译到你的项目中.所有的依赖都下载到Packages(SPM自动创建的)文件件下. 例如, 如果你想使用Mustache模板, 你的Package.swift文件可能像下面这样:
 
-```objective-c
+```swift
 import PackageDescription
  
 let package = Package(
@@ -94,7 +94,7 @@ let package = Package(
 
 
 
-```objective-c
+```swift
 
 import PackageDescription
  
@@ -126,7 +126,7 @@ let package = Package(
 
 SPM可以使用如下的命令来构建你的项目, 也可以用来cleaning up 任何build artifacts:
 
-```objective-c
+```swift
 swift build
 ```
 
@@ -146,7 +146,7 @@ swift build
 
 
 
-```objective-c
+```swift
 swift build --clean
 swift build --clean=dist  
 ```
@@ -163,7 +163,7 @@ swift build --clean=dist
 
 SPM可以根据你的package.swift文件生成Xcode项目. 这个项目允许你使用Xcode构建你的 debug应用. 为了生成Xcode项目,执行如下命令:
 
-```objective-c
+```swift
 swift package generate-xcodeproj
 ```
 
