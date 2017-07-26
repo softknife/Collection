@@ -20,7 +20,7 @@
 
 我们可以使用structured configuration data来配置一个或者多个HTTPServer,并且启动他们.  这些配置数据包括设置参数,例如: the listen port and bind address but also permits pointing handlers to specific fuctions by name.  如果我们从JSON文件中加载这些配置数据,那么这些特性是必须的. 为了在Linux上驱动这些函数, 你必须构建你的SPM可执行程序,使用如下额外的标记:
 
-```objective-c
+```swift
 swift build -Xlinker --export-dynamic
 ```
 
@@ -36,7 +36,7 @@ swift build -Xlinker --export-dynamic
 
 配置数据将会被用来启动一个或者多个HTTPServer.
 
-```objective-c
+```swift
 public extension HTTPServer {
     public static func launch(wait: Bool = true, configurationPath path: String) throws -> [LaunchContext]
     public static func launch(wait: Bool = true, configurationFile file: File) throws -> [LaunchContext]
@@ -50,7 +50,7 @@ public extension HTTPServer {
 
 
 
-```objective-c
+```swift
 do {
     try HTTPServer.launch(configurationPath: "/path/to/perfecthttp.json")
 } catch {
@@ -62,7 +62,7 @@ do {
 
 从JSON解析出来后, 配置文件中,在顶层应该包括"servers"key, 对应的value是一个字典数组, 这些字典用来描述那些将会被启动的服务器.
 
-```objective-c
+```swift
 [
     "servers":[
         […],
@@ -76,7 +76,7 @@ do {
 
 一个简单的单一服务器配置字典可能像下面格式.  注意例子中的keys/values将会在随后的文件中解释.
 
-```objective-c
+```swift
 [
     "servers":[
         [
@@ -151,7 +151,7 @@ Perfect带有request handlers , 用以处理各种常用的任务: redirecting c
 
 
 
-```objective-c
+```swift
 
 [
     "servers":[
@@ -201,7 +201,7 @@ Perfect带有request handlers , 用以处理各种常用的任务: redirecting c
 
 下面例子中是一个`RequestHandler`生成器:
 
-```objective-c
+```swift
 
 public extension HTTPHandler {
     public static func staticFiles(data: [String:Any]) throws -> RequestHandler {
@@ -236,7 +236,7 @@ Request filters 可以筛选或者操作从客户端过来的请求. 例如,auth
 
 下面例子中有两个filters,一个是request,一个是response.
 
-```objective-c
+```swift
 [
     "servers": [
         [
@@ -267,7 +267,7 @@ Request filters 可以筛选或者操作从客户端过来的请求. 例如,auth
 
 Filters的名字的工作机制和route handlers类似,  但是,他们的函数签名是不同的.  一个request filter generator 函数持有一个包含配置数据的[String:Any]字典, 返回值根据`type`区分为`HTTPRequestFilter`或者`HTTPResponseFilter`.
 
-```objective-c
+```swift
 // a request filter generator
 public func customReqFilter(data: [String:Any]) throws -> HTTPRequestFilter {
     struct ReqFilter: HTTPRequestFilter {
@@ -355,7 +355,7 @@ Cipher list的默认值可以通过`TLSConfiguration.defaultCipherList`这个属
 
 最简单的启动服务器的方法:
 
-```objective-c
+```swift
 
 public extension HTTPServer {
     public static func launch(wait: Bool = true, name: String, port: Int, routes: Routes,
@@ -374,7 +374,7 @@ public extension HTTPServer {
 
 剩下的启动方法中需要有一个或者多个服务请描述作为参数, 启动服务器后会返回参数`LaunchContext`.
 
-```objective-c
+```swift
 public extension HTTPServer {
     public static func launch(wait: Bool = true, _ servers: [Server]) throws -> [LaunchContext]
     public static func launch(wait: Bool = true, _ server: Server, _ servers: Server...) throws -> [LaunchContext]
@@ -385,7 +385,7 @@ public extension HTTPServer {
 
 这里`Server`参数用以描述HTTPServer, 最后会被启动起来, Server这个这个类的结构如下:
 
-```objective-c
+```swift
 public extension HTTPServer {
     public struct Server {
         public init(name: String, address: String, port: Int, routes: Routes,
@@ -419,7 +419,7 @@ public extension HTTPServer {
 
 下面是启动服务器的一些常用写法:
 
-```objective-c
+```swift
 // start a single server serving static files
 try HTTPServer.launch(name: "localhost", port: 8080, documentRoot: "/path/to/webroot")
  
@@ -453,7 +453,7 @@ try HTTPServer.launch(.secureServer(TLSConfiguration(certPath: "/path/to/cert"),
 
 这里`TLSConfiguration`结构体是用来配置HTTPS,定义如下:
 
-```objective-c
+```swift
 public struct TLSConfiguration {
     public init(certPath: String, keyPath: String? = nil,
                 caCertPath: String? = nil, certVerifyMode: OpenSSLVerifyMode? = nil,
@@ -467,7 +467,7 @@ public struct TLSConfiguration {
 
 如果上述任何一个`HTTPServer.launch`方法中`wait:false`,那么一个或者多个`LaunchContext`将会被返回. 通过这些对象我们可以检查每个server的状态, 同时我们可以通过他们来控制每个server终止.
 
-```objective-c
+```swift
 public extension HTTPServer {
     public struct LaunchFailure: Error {
         let message: String
@@ -495,7 +495,7 @@ public extension HTTPServer {
 
 
 
-```objective-c
+```swift
 
 public class HTTPServer {
     /// The directory in which web documents are sought.
