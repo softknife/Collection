@@ -24,7 +24,7 @@ Request filters 在request读取完,但是还未呈递给request handler之间�
 
 
 
-## Creating
+#### Creating
 
 Request filters 必须遵守`HTTPRequestFilter`协议:
 
@@ -62,5 +62,253 @@ public enum HTTPRequestFilterResult {
 
 
 
-## Adding
+#### Adding
+
+Request filters 直接添加到server上, 并以`[(HTTPRequestFilter,HTTPFilterPriority)]`形式传入:
+
+```swift
+public class HTTPServer {
+    public func setRequestFilters(_ request: [(HTTPRequestFilter, HTTPFilterPriority)]) -> HTTPServer
+}
+```
+
+
+
+调用这个方法可以添加filter. 添加每个filter时需要设置他的优先级. filters数组中的元素可以是任意顺序, 服务器将会对他们进行再排序, 将high-priority的filter放到lower的前面,相同优先级的filter顺序不变.
+
+
+
+#### Example
+
+下面举一个filter相关的例子. 他说明了如何创建,添加,以及filter优先级如何交互.
+
+```swift
+var oneSet = false
+var twoSet = false
+var threeSet = false
+ 
+struct Filter1: HTTPRequestFilter {
+    func filter(request: HTTPRequest, response: HTTPResponse, callback: (HTTPRequestFilterResult) -> ()) {
+        oneSet = true
+        callback(.continue(request, response))
+    }
+}
+struct Filter2: HTTPRequestFilter {
+    func filter(request: HTTPRequest, response: HTTPResponse, callback: (HTTPRequestFilterResult) -> ()) {
+        XCTAssert(oneSet)
+        XCTAssert(!twoSet && !threeSet)
+        twoSet = true
+        callback(.execute(request, response))
+    }
+}
+struct Filter3: HTTPRequestFilter {
+    func filter(request: HTTPRequest, response: HTTPResponse, callback: (HTTPRequestFilterResult) -> ()) {
+        XCTAssert(false, "This filter should be skipped")
+        callback(.continue(request, response))
+    }
+}
+struct Filter4: HTTPRequestFilter {
+    func filter(request: HTTPRequest, response: HTTPResponse, callback: (HTTPRequestFilterResult) -> ()) {
+        XCTAssert(oneSet && twoSet)
+        XCTAssert(!threeSet)
+        threeSet = true
+        callback(.halt(request, response))
+    }
+}
+ 
+var routes = Routes()
+routes.add(method: .get, uri: "/", handler: {
+        request, response in
+        XCTAssert(false, "This handler should not execute")
+        response.completed()
+    }
+)
+ 
+let requestFilters: [(HTTPRequestFilter, HTTPFilterPriority)] = [
+    (Filter1(), HTTPFilterPriority.high), 
+    (Filter2(), HTTPFilterPriority.medium), 
+    (Filter3(), HTTPFilterPriority.medium), 
+    (Filter4(), HTTPFilterPriority.low)
+]
+ 
+let server = HTTPServer()
+server.setRequestFilters(requestFilters)
+server.serverPort = 8181
+server.addRoutes(routes)
+try server.start()
+```
+
+
+
+### Response Filters
+
+在response header data 发送给客户端之前,每个response filter都会执行一次, 后续的body data 发送前再执行一遍. 这些过滤器可以以任何他们认为合适的方式修改输出响应对象，包括添加或删除headers或重写body数据。
+
+
+
+#### Creating
+
+Response filters必选遵守`HTTPResponseFilter`协议.
+
+```swift
+/// A filter which can be called to modify a HTTPResponse.
+public protocol HTTPResponseFilter {
+    /// Called once before headers are sent to the client.
+    func filterHeaders(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ())
+    /// Called zero or more times for each bit of body data which is sent to the client.
+    func filterBody(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ())
+}
+```
+
+
+
+当等到发送response headers时, `filterHeaders`方法会调用. 这个方法中,你可以对`HTTPResponse`对象进行任何需要的操作, 然后调用callback. 调用callback时需要传递一个参数`HTTPResponseFilterResult`值, 参数类型定义如下:
+
+```swift
+/// Response from one filter.
+public enum HTTPResponseFilterResult {
+    /// Continue with filtering.
+    case `continue`
+    /// Stop executing filters until the next push.
+    case done
+    /// Halt and close the request.
+    case halt
+}
+```
+
+
+
+这些值意思是, 系统是否应该继续处理filter,还是停止执行filters等待下一次数据进入, 又或者完全终止request.
+
+
+
+当发送一段离散的数据块到客户端时, filters的`filterBody`函数将会被调用. 这个函数中,你可以通过`HTTPResponse.bodyBytes`属性检测输出数据, 还可以修改或者替换数据. 因为这个阶段headers已经发送出去了, 所以此时对header数据进行的任何修改都会被忽略. 一旦filter's body filtering 得出结论, 就会调用callback并传递一个`HTTPResponseFilterResult`参数值. 这里的参数值和`filterHeaders`函数中一样.
+
+
+
+#### Adding
+
+Response Filters 直接添加到服务器上,  并以`[(HTTPResponseFilter,HTTPFilterPriority)]`形式传入:
+
+```swift
+public class HTTPServer {
+    public func setResponseFilters(_ response: [(HTTPResponseFilter, HTTPFilterPriority)]) -> HTTPServer
+}
+```
+
+
+
+调用这个函数设置服务器的response filters. 每个filter伴随着自己的优先级. filters数组中的元素可以是任意顺序. 服务器将会重新排序,将等级高的的放前面. 等级相同的顺序不变.
+
+
+
+#### Example
+
+下面举一个filter相关的例子. 说明了response filter 优先级如何操作, response filter如何修改输出headers和body 数据.
+
+
+
+```swift
+struct Filter1: HTTPResponseFilter {
+    func filterHeaders(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+        response.setHeader(.custom(name: "X-Custom"), value: "Value")
+        callback(.continue)
+    }
+    func filterBody(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+        callback(.continue)
+    }
+}
+struct Filter2: HTTPResponseFilter {
+    func filterHeaders(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+        callback(.continue)
+    }
+    func filterBody(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+        var b = response.bodyBytes
+        b = b.map { $0 == 65 ? 97 : $0 }
+        response.bodyBytes = b
+        callback(.continue)
+    }
+}   
+struct Filter3: HTTPResponseFilter {
+    func filterHeaders(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+        callback(.continue)
+    }
+    func filterBody(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+        var b = response.bodyBytes
+        b = b.map { $0 == 66 ? 98 : $0 }
+        response.bodyBytes = b
+        callback(.done)
+    }
+}   
+struct Filter4: HTTPResponseFilter {
+    func filterHeaders(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+        callback(.continue)
+    }
+    func filterBody(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+        XCTAssert(false, "This should not execute")
+        callback(.done)
+    }
+}
+ 
+var routes = Routes()
+routes.add(method: .get, uri: "/", handler: {
+    request, response in
+    response.addHeader(.contentType, value: "text/plain")
+    response.isStreaming = true
+    response.setBody(string: "ABZ")
+    response.push {
+        _ in
+        response.setBody(string: "ABZ")
+        response.completed()
+    }
+})
+ 
+let responseFilters: [(HTTPResponseFilter, HTTPFilterPriority)] = [
+    (Filter1(), HTTPFilterPriority.high),
+    (Filter2(), HTTPFilterPriority.medium),
+    (Filter3(), HTTPFilterPriority.low),
+    (Filter4(), HTTPFilterPriority.low)
+]
+ 
+let server = HTTPServer()
+server.setResponseFilters(responseFilters)
+server.serverPort = port
+server.addRoutes(routes)
+try server.start()
+```
+
+
+
+这个例子将会给response header添加一个`X-Custom`键值对, 给body中添加一个小写的a或者b. 注意这个例子中handler函数中将response设置为streaming mode, 意味着块级encoded数据将会被使用, body data将会以两块离散的块级数据分别发送出去.
+
+
+
+### 404 Response Filter
+
+一个更有用的例子如下. 这段代码中将会创建并添加一个filter, 这个filter监听`404 not found ` responses, 你可以提供一个自定义的描述.
+
+
+
+```swift
+struct Filter404: HTTPResponseFilter {
+    func filterBody(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+        callback(.continue)
+    }
+ 
+    func filterHeaders(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
+        if case .notFound = response.status {
+            response.setBody(string: "The file \(response.request.path) was not found.")
+            response.setHeader(.contentLength, value: "\(response.bodyBytes.count)")
+            callback(.done)
+        } else {
+            callback(.continue)
+        }
+    }
+}
+ 
+let server = HTTPServer()
+server.setResponseFilters([(Filter404(), .high)])
+server.serverPort = 8181
+try server.start()
+```
 
