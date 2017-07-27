@@ -312,3 +312,88 @@ server.serverPort = 8181
 try server.start()
 ```
 
+
+
+
+
+## Web Redirects
+
+Perfect WebRedirects module将会过滤具体的路由(包括尾部通配符路由), 然后,如果匹配到某个路由时,就会按照构造那样执行重定向.
+
+This can be important for maintaining SEO ranking in systems that have moved.  例如, 如果我们移动一个静态的HTML网站, 这里路由从`/about.html`替换成新的路由`/about`,但是并没有有效的重定向, 这个网站或者系统将会失去SEO 排名.
+
+
+
+这里有一个demo展示如何使用Perfect WebRedirects module: [Perfect-WebRedirects-Demo](https://github.com/PerfectExamples/Perfect-WebRedirects-Demo).
+
+
+
+### Including in your project
+
+在你的项目Package.swift文件中添加依赖库Perfect-WebRedirects:
+
+```swift
+.Package(url: "https://github.com/PerfectlySoft/Perfect-WebRedirects", majorVersion: 1),
+```
+
+
+
+然后在你的`main.swift`文件中, 导入并添加该filter:
+
+```swift
+import PerfectWebRedirects
+
+// Add to the "filters" section of the config:
+[
+    "type":"request",
+    "priority":"high",
+    "name":WebRedirectsFilter.filterAPIRequest,
+]
+```
+
+
+
+如果你还添加了Request Logger filters, 如果Web Redirects 对象直接在RequestLogger filter后面添加, 那么原Request(还有他的绑定的重定向代码)和请求都会被打印.
+
+
+
+### Configuration file
+
+路由的配置信息包含在JSON文件中,在`/config/redirect-rules/*.json`位置,如下形式:
+
+```swift
+{
+
+  "/test/no": {
+    "code": 302,
+    "destination": "/test/yes"
+  },
+
+    "/test/no301": {
+        "code": 301,
+        "destination": "/test/yes"
+  },
+
+    "/test/wild/*": {
+        "code": 302,
+        "destination": "/test/wildyes"
+  },
+
+    "/test/wilder/*": {
+        "code": 302,
+        "destination": "/test/wilding/*"
+  }
+
+}
+```
+
+
+
+注意,多个JSON文件可以存在于该文件夹下; 当filter被触发时,所有的JSON文件都会在第一个时间加载.
+
+
+
+上面代码中"key"负责匹配路由(the "old" file or route), "value"包含HTTP code, 新的目标路由会被重定向.
+
+
+
