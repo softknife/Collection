@@ -393,7 +393,7 @@ import PerfectWebRedirects
 
 
 
-上面代码中"key"负责匹配路由(the "old" file or route), "value"包含HTTP code, 新的目标路由会被重定向.
+上面代码中"key"负责匹配路由(the "old" file or route), "value"包含HTTP code,和重定向的新目标路由.
 
 
 
