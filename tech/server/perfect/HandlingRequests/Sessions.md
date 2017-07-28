@@ -458,3 +458,193 @@ Defining the Session Driver:
 let sessionDriver = SessionMongoDBDriver()
 ```
 
+
+
+
+
+*****
+
+
+
+## CSRF (Cross Site Request Forgery) Security
+
+>  跨站点请求伪造
+
+
+
+CSRF是一种攻击行为, 他会使web应用的终端用户(他们已经被授权了)强制执行unwanted actions. **CSRF attacks specially target state-changing requests, not theft of data, since the attacker has no way to see the response to the forged request**(CSRF攻击专门针对状态改变的请求，而不是窃取数据，因为攻击者无法看到对伪造请求的响应。).
+
+社交工程师通过一点辅助技巧(例如通过邮箱或者聊天发送一个链接), 攻击者就可以哄骗web app用户去执行他所希望的行为.  如果受害者是普通用户, 成功的CSRF攻击可以迫使用户执行状态改变请求,例如转移资金,修改email地址, 等等诸如此类行为. 如果受害者是管理员账号, CSRF攻击可以损坏整个web app(OWASP).
+
+
+
+CSRF as an attack vector is often overlooked, and represents a significant "chaos" factor unless the validation is handled at the highest level: the framework.(CSRF作为攻击媒介往往被忽视，除非验证在最高级别处理：框架, 否则CSRF将会成为一个重大的“混乱”因素。)  这样可以允许web app 和API 作者对安全层有一个强有力的控制.
+
+
+
+The [Perfect Sessions](http://www.perfect.org/docs/sessions.html) 模块支持 CSRF 配置.
+
+If you have included Perfect Sessions or any of its datasource-specific implementations in your Packages.swift file, you already have CSRF support.
+
+
+
+### Relevant Examples
+
+- [Perfect-Session-Memory-Demo](https://github.com/PerfectExamples/Perfect-Session-Memory-Demo)
+
+
+
+### Configuration
+
+配置CSRF的例子可能像如下形式:
+
+```swift
+SessionConfig.CSRF.checkState = true
+SessionConfig.CSRF.failAction = .fail
+SessionConfig.CSRF.checkHeaders = true
+SessionConfig.CSRF.acceptableHostnames.append("http://www.example.com")
+SessionConfig.CSRF.requireToken = true
+```
+
+
+
+#### SessionConfig.CSRF.checkState
+
+这个是最主要的开关,如果设置为true,CSRF 将会对所有routes起作用.
+
+#### SessionConfig.CSRF.failAction
+
+这个参数是用来说明如果CSRF验证失败后,后续采取什么动作的. 可能的选择如下:
+
+- `.fail` - Execute an immediate halt. No further processing will be done, and an HTTP Status `406 Not Acceptable` is generated.
+- `.log` - Processing will continue, however the event will be recorded in the log.
+- `.none` - Processing will continue, no action is taken.
+
+#### SessionConfig.CSRF.acceptableHostnames
+
+这个Host names 数组将会在后续使用, 用来对`origin`匹配验收进行比较.
+
+
+
+#### SessionConfig.CSRF.checkHeaders
+
+如果`CSRF.checkheader`配置为`true`, origin和host headers 将会验证有效性.
+
+- The `Origin`, `Referrer` or `X-Forwarded-For` headers must be populated ("origin").
+- If the "origin" is specified in `SessionConfig.CSRF.acceptableHostnames`, the CSRF check will continue to the next phase and the following checks are skipped.
+- The `Host` or `X-Forwarded-Host` header must be present ("host").
+- The "host" and "origin" values must match exactly.
+
+
+
+#### SessionConfig.CSRF.requireToken
+
+当设置为true时, 将会强制所有的POST请求都带有"_csrf"参数, 或者, 如果content-type 是"application/json",那么request的header中必须绑定"X-CSRF-Token". header中的内容或者参数应该匹配`request.session.data["csrf"]`的值. 这个值会在session start时自动设置好.
+
+
+
+#### Session state
+
+虽然不是配置参数，但值得注意的是，如果`SessionConfig.CSRF.checkState`为true，如果会话为“new”，则不接受POST请求。 这是安全建议支持的故意立场。
+
+
+
+
+
+OWASP, Cross-Site Request Forgery (CSRF): [https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF))
+
+
+
+
+
+*****
+
+## CORS (Cross Origin Resource Sharing) Security
+
+> 跨原始资源共享
+
+CORS是"open web"中的一个很重要的部分,  因此, 如果不支持CORS,框架就不是完整的.
+
+Monsur Hossain from [html5rocks.com introduces CORS very effectively](https://www.html5rocks.com/en/tutorials/cors/):
+
+> APIs are the threads that let you stitch together a rich web experience. But this experience has a hard time translating to the browser, where the options for cross-domain requests are limited to techniques like JSON-P (which has limited use due to security concerns) or setting up a custom proxy (which can be a pain to set up and maintain).
+>
+> Cross-Origin Resource Sharing (CORS) is a W3C spec that allows cross-domain communication from the browser. By building on top of the XMLHttpRequest object, CORS allows developers to work with the same idioms as same-domain requests.
+>
+> The use-case for CORS is simple. Imagine the site alice.com has some data that the site bob.com wants to access. This type of request traditionally wouldn’t be allowed under the browser’s same origin policy. However, by supporting CORS requests, alice.com can add a few special response headers that allows bob.com to access the data.
+>
+> As you can see from this example, CORS support requires coordination between both the server and client. Luckily, if you are a client-side developer you are shielded from most of these details. The rest of this article shows how clients can make cross-origin requests, and how servers can configure themselves to support CORS.
+
+
+
+The [Perfect Sessions](http://www.perfect.org/docs/sessions.html) 模块支持  CORS configuration, 这样你就可以随心的让你的API和assets可用或者被包含起来.
+
+如果你已经导入了Sessions模块或者任何数据库实现的Sessions, 你已经支持CORS; 然而,默认他是关闭的 .
+
+
+
+### Relevant Examples
+
+- [Perfect-Session-Memory-Demo](https://github.com/PerfectExamples/Perfect-Session-Memory-Demo)
+
+### Configuration
+
+
+
+```swift
+// Enabled, true or false.
+// Default is false.
+SessionConfig.CORS.enabled = true
+ 
+// Array of acceptable hostnames for incoming requests
+// To enable CORS on all, have a single entry, *
+SessionConfig.CORS.acceptableHostnames = ["*"]
+ 
+// However if you wish to enable specific domains:
+SessionConfig.CORS.acceptableHostnames.append("http://www.test-cors.org")
+ 
+// Wildcards can also be used at the start or end of hosts
+SessionConfig.CORS.acceptableHostnames.append("*.example.com")
+SessionConfig.CORS.acceptableHostnames.append("http://www.domain.*")
+ 
+// Array of acceptable methods
+public var methods: [HTTPMethod] = [.get, .post, .put]
+ 
+// An array of custom headers allowed
+public var customHeaders = [String]()
+ 
+// Access-Control-Allow-Credentials true/false.
+// Standard CORS requests do not send or set any cookies by default. 
+// In order to include cookies as part of the request enable the client to do so by setting to true
+public var withCredentials = false
+ 
+// Max Age (seconds) of request / OPTION caching.
+// Set to 0 for no caching (default)
+public var maxAge = 3600
+```
+
+
+
+当一个CORS请求提交到服务器时, 如果没有匹配到,那么CORS headers不会在OPTIONs response中产生,  这将指示浏览器不能接受该资源.
+
+```swift
+// An array of allowable HTTP Methods.
+// In the case of the above configuration example:
+Access-Control-Allow-Methods: GET, POST, PUT
+ 
+// If the origin is acceptable the origin will be echoed back to the requester 
+// (even if configured with *)
+Access-Control-Allow-Origin: http://www.test-cors.org
+ 
+// If the server wishes cookies to be sent along with requests, 
+// this should return true
+Access-Control-Allow-Credentials: true
+ 
+// The length of time the OPTIONS request can be cached for.
+Access-Control-Max-Age: 3600
+```
+
+
+
+An excellent resource for testing CORS entitlements and responses is available at [http://www.test-cors.org](http://www.test-cors.org/)
+
