@@ -177,3 +177,284 @@ The [**CSRF** (Cross Site Request Forgery)](http://www.perfect.org/docs/csrf.htm
 
 ### Defining the Session Driver
 
+每一种Session Driver都有自己的实现,这是针对存储选项的优化. 因此, 你必须在`server.start()`之前,设置好session driver 和 HTTP filters.
+
+
+
+在main.swift文件中, SessionConfig改变后, 进行如下设置:
+
+```swift
+// Instantiate the HTTPServer
+let server = HTTPServer()
+ 
+// Define the Session Driver
+let sessionDriver = SessionMemoryDriver()
+ 
+// Add the filters so the pre- and post- route actions are executed.
+server.setRequestFilters([sessionDriver.requestFilter])
+server.setResponseFilters([sessionDriver.responseFilter])
+```
+
+在Perfect中, filters在某种形式上类似于其他框架中的中间件的概念. `request`filter将会截获到来的request ,解析其中的session token, 尝试着从storage中加载session, 将session data 应用于application. 在Response发送给客户端或者浏览器之前, 他将会被执行, 保存session,并且重新发送cookies 给客户端或者浏览器.
+
+
+
+有关存储适当的设置和驱动程序语法，请参阅下面的“数据库特定选项”。
+
+
+
+### Accessing the Session Data
+
+
+
+Session的`token`,`userid`和`data`属性暴露在`request`对象中.我们可以在handler中通过request来读取&写入 `userid`,`data`属性, 并且自动保存到response filter的storage中.
+
+
+
+在列子中,我们可以看到一个简单的handler样例.
+
+```swift
+// Defining an "Index" handler
+open static func indexHandlerGet(request: HTTPRequest, _ response: HTTPResponse) {
+    // Random generator from TurnstileCrypto
+    let rand = URandom()
+ 
+    // Adding some random data to the session for demo purposes
+    request.session.data[rand.secureToken] = rand.secureToken
+ 
+    // For demo purposes, dumping all current session data as a JSON string.
+    let dump = try? request.session.data.jsonEncodedString()
+ 
+    // Some simple HTML that displays the session token/id, and the current data as JSON.
+    let body = "<p>Your Session ID is: <code>\(request.session.token)</code></p><p>Session data: <code>\(dump)</code></p>"
+ 
+    // Send the response back.
+    response.setBody(string: body)
+    response.completed()
+}
+```
+
+
+
+读取当前session id:
+
+```swift
+request.session.token
+```
+
+访问userid:
+
+```swift
+// read:
+request.session.userid
+ 
+// write:
+request.session.userid = "MyString"
+```
+
+访问存储在session中的数据:
+
+```swift
+// read:
+request.session.data
+ 
+// write:
+request.session.data["keyString"] = "Value"
+request.session.data["keyInteger"] = 1
+request.session.data["keyBool"] = true
+ 
+// reading a specific value
+if let val = request.session.data["keyString"] as? String {
+    let keyString = val
+}
+```
+
+
+
+### Database-Specific options
+
+#### Redis
+
+Importing the module, in Package.swift:
+
+```swift
+.Package(url:"https://github.com/PerfectlySoft/Perfect-Session-Redis.git", majorVersion: 1)
+```
+
+
+
+Defining the connection to the PostgreSQL server:
+
+```swift
+RedisSessionConnector.host = "localhost"
+RedisSessionConnector.port = 5432
+RedisSessionConnector.password = "secret"
+```
+
+
+
+Defining the Session Driver:
+
+```swift
+let sessionDriver = SessionRedisDriver()
+```
+
+
+
+#### PostgreSQL
+
+Importing the module, in Package.swift:
+
+```swift
+.Package(url:"https://github.com/PerfectlySoft/Perfect-Session-PostgreSQL.git", majorVersion: 1)
+```
+
+Defining the connection to the PostgreSQL server:
+
+```swift
+PostgresSessionConnector.host = "localhost"
+PostgresSessionConnector.port = 5432
+PostgresSessionConnector.username = "username"
+PostgresSessionConnector.password = "secret"
+PostgresSessionConnector.database = "mydatabase"
+PostgresSessionConnector.table = "sessions"
+```
+
+
+
+Defining the Session Driver:
+
+```swift
+
+let sessionDriver = SessionPostgresDriver()
+
+```
+
+
+
+#### MySQL
+
+Importing the module, in Package.swift:
+
+```swift
+.Package(url:"https://github.com/PerfectlySoft/Perfect-Session-MySQL.git", majorVersion: 1)
+```
+
+
+
+Defining the connection to the MySQL server:
+
+```swift
+MySQLSessionConnector.host = "localhost"
+MySQLSessionConnector.port = 3306
+MySQLSessionConnector.username = "username"
+MySQLSessionConnector.password = "secret"
+MySQLSessionConnector.database = "mydatabase"
+MySQLSessionConnector.table = "sessions"
+```
+
+
+
+Defining the Session Driver:
+
+```swift
+let sessionDriver = SessionMySQLDriver()
+```
+
+
+
+#### SQLite
+
+Importing the module, in Package.swift:
+
+```swift
+.Package(url:"https://github.com/PerfectlySoft/Perfect-Session-SQLite.git", majorVersion: 1)
+```
+
+
+
+Defining the connection to the SQLite server:
+
+```swift
+SQLiteConnector.db = "./SessionDB"
+```
+
+
+
+Defining the Session Driver:
+
+```swift
+let sessionDriver = SessionSQLiteDriver()
+```
+
+
+
+#### CouchDB
+
+Importing the module, in Package.swift:
+
+```swift
+.Package(url:"https://github.com/PerfectlySoft/Perfect-Session-CouchDB.git", majorVersion: 1)
+```
+
+
+
+Defining the CouchDB database to use for session storage:
+
+```swift
+SessionConfig.couchDatabase = "perfectsessions"
+```
+
+
+
+Defining the connection to the CouchDB server:
+
+```swift
+CouchDBConnection.host = "localhost"
+CouchDBConnection.username = "username"
+CouchDBConnection.password = "secret"
+```
+
+
+
+Defining the Session Driver:
+
+```swift
+let sessionDriver = SessionCouchDBDriver()
+```
+
+
+
+#### MongoDB
+
+Importing the module, in Package.swift:
+
+```swift
+.Package(url:"https://github.com/PerfectlySoft/Perfect-Session-MongoDB.git", majorVersion: 1)
+```
+
+
+
+Defining the CouchDB database to use for session storage:
+
+```swift
+SessionConfig.mongoCollection = "perfectsessions"
+```
+
+
+
+Defining the connection to the CouchDB server:
+
+```swift
+MongoDBConnection.host = "localhost"
+MongoDBConnection.database = "perfect_testing"
+```
+
+
+
+Defining the Session Driver:
+
+```swift
+let sessionDriver = SessionMongoDBDriver()
+```
+
