@@ -17,5 +17,9 @@
 
 [Configuring and Launching HTTPServer](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/ConfiguringAndLaunching.md)
 
-
 [Handling Requests](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/HandlingRequests.md)
+
+[WebSockets](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/WebSockets.md)
+
+[Utilities](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities.md)
+

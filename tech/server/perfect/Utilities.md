@@ -10,13 +10,23 @@
 
 Consult the followings sections for detailed information on the utilities available in Perfect's libraries:
 
-- [Bytes](http://www.perfect.org/docs/bytes.html)
-- [File](http://www.perfect.org/docs/file.html)
-- [Dir](http://www.perfect.org/docs/dir.html)
-- [Threading](http://www.perfect.org/docs/thread.html)
-- [UUID](http://www.perfect.org/docs/UUID.html)
-- [SysProcess](http://www.perfect.org/docs/sysProcess.html)
-- [Log](http://www.perfect.org/docs/log.html)
-- [CURL](http://www.perfect.org/docs/cURL.html)
-- [Zip](http://www.perfect.org/docs/zip.html)
+- [Bytes](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/Bytes.md)
+- [Crypto](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/Crypto.md)
+- [CURL](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/CURL.md)
+- [File](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/File.md)
+- [Dir](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/Dir.md)
+- [Google Analytics Measurement Protocol](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/GoogleAnalyticsMeasurementProtocol.md)
+- [Log](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/Log.md)
+- [Log Files](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/LogFiles.md)
+- [OAuth2 and Providers](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/OAuth2andProviders.md)
+- [Repeater/Cron](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/Repeater-Cron.md)
+- [Remote Logging](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/RemoteLogging.md)
+- [SMTP](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/SMTP.md)
+- [SysProcess](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/SysProcess.md)
+- [Threading](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/Threading.md)
+- [UUID](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/UUID.md)
+- [XML](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/XML.md)
+- [INI](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/INI.md)
+- [Zip](https://github.com/EricYellow/Collection/blob/master/tech/server/perfect/Utilities/Zip.md)
+
 
